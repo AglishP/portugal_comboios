@@ -8,6 +8,7 @@ URL = "https://www.cp.pt/sites/passageiros/pt/consultar-horarios/horarios-result
 dateFormater = '%Y-%m-%d'
 timeFormater = '%H:%M'
 timeResponseFormater = '%Hh%M'
+CURRENT_STATION = 'Santo Amaro'
 CITY_STATION = 'Lisboa - Cais do Sodre'
 OCEAN_STATION = 'Cascais'
 
@@ -89,7 +90,6 @@ def main(currentStation, cityStation, oceanStation):
     print(result)
 
 if __name__ == '__main__':
-    currentStation = 'Santo Amaro'
     parser = argparse.ArgumentParser(description='Get next 2 trains from yours station to Cais do Sodre and Cascais')
     parser.add_argument('-s', '--station', help='Your home stations from wich we search schedule', required=False)
     parser.add_argument('-c', '--city', help='Your city station', required=False)
@@ -97,6 +97,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.station != None:
         currentStation = args.station
+    else:
+        currentStation = CURRENT_STATION
     if args.city != None:
         cityStation = args.city
     else:
