@@ -8,8 +8,8 @@ URL = "https://www.cp.pt/sites/passageiros/pt/consultar-horarios/horarios-result
 dateFormater = '%Y-%m-%d'
 timeFormater = '%H:%M'
 timeResponseFormater = '%Hh%M'
-CURRENT_STATION = 'Santo Amaro'
-CITY_STATION = 'Lisboa - Cais do Sodre'
+DEPARTURE_STATION = 'Santo Amaro'
+ARRIVE_STATION = 'Lisboa - Cais do Sodre'
 OCEAN_STATION = 'Cascais'
 
 
@@ -82,30 +82,34 @@ def getNext2Trains(departure, arrival):
     return findClosestAndNest(rowList)
 
 def main(currentStation, cityStation, oceanStation):
-    toCity = getNext2Trains(currentStation, cityStation)
-    toOcean = getNext2Trains(cityStation, oceanStation)
+    direction = [{'arriveTo': cityStation, 'trains': getNext2Trains(currentStation, cityStation)}]
+    if oceanStation != None:
+        direction.append({'arriveTo': oceanStation, 'trains': getNext2Trains(currentStation, oceanStation)})
 
-    result = {'currentStation': currentStation,'toCity': toCity, 'toOcean': toOcean}
+    result = {'currentStation': currentStation,'direction': direction}
     
     print(result)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Get next 2 trains from yours station to Cais do Sodre and Cascais')
-    parser.add_argument('-s', '--station', help='Your home stations from wich we search schedule', required=False)
-    parser.add_argument('-c', '--city', help='Your city station', required=False)
+    parser.add_argument('-d', '--departure', help='Your home stations from wich we search schedule', required=False)
+    parser.add_argument('-a', '--arrive', help='Your arrival station', required=False)
+    parser.add_argument('-tw', '--twoway', help='Use default station for second directions', required=False, action='store_true', default=False)
     parser.add_argument('-o', '--ocean', help='Your ocean station', required=False)
     args = parser.parse_args()
-    if args.station != None:
-        currentStation = args.station
+    if args.departure != None:
+        departureStation = args.departure
     else:
-        currentStation = CURRENT_STATION
-    if args.city != None:
-        cityStation = args.city
+        departureStation = DEPARTURE_STATION
+    if args.arrive != None:
+        cityStation = args.arrive
     else:
-        cityStation = CITY_STATION
+        cityStation = ARRIVE_STATION
+    oceanStation = None
     if args.ocean != None:
         oceanStation = args.ocean
     else:
-        oceanStation = OCEAN_STATION
-    main(currentStation, cityStation, oceanStation)
+        if args.twoway != None and args.twoway == True:
+            oceanStation = OCEAN_STATION
+    main(departureStation, cityStation, oceanStation)
 
