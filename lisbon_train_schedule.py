@@ -37,33 +37,44 @@ def rowSchedule_ToList(rowSchedule):
         foundTd = tr.findAll('td', {'class': 'hidden-xs visible-sm visible-md visible-lg visible-print'})
         if foundTd == None:
             continue
+        departureTime = None
+        duration = None
         for td in foundTd:
             if 'id' in td.attrs and 'goDeparTime' in td.attrs['id']:
-                resultList.append(td.text)
+                departureTime = datetime.datetime.strptime(td.text, timeResponseFormater)
+            elif td.text != None and len(td.text) > 0:
+                if td.text[1] == 'h' or td.text[2] == 'h':
+                    duration = td.text
+        if departureTime != None and duration != None:
+            resultList.append({'departureTime': departureTime, 'duration': duration})
     return resultList
 
-def findClosestAndNest(rowList):
+def findClosestAndNext(rowList):
     now = datetime.datetime.now().strftime(timeFormater)
     currentTime = datetime.datetime.strptime(now, timeFormater)
-    sortedList = sorted(rowList)
+    # sortedList = sorted(rowList)
     closestTo = None
     i = 0
     closestIndex = None
     nextTime = None
-    while i < len(sortedList):
-        time = sortedList[i]
-        time = datetime.datetime.strptime(time, timeResponseFormater)
+    while i < len(rowList):
+        time = rowList[i].get('departureTime')
         if time > currentTime:
             if closestTo == None:
-                closestTo = time
+                closestTo = rowList[i]
                 closestIndex = i
             elif time < closestTo:
-                closestTo = time
+                closestTo = rowList[i]
                 closestIndex = i
         i+=1
-    if closestIndex != None and closestIndex < len(sortedList) - 1:
-        nextTime = sortedList[closestIndex + 1]
-    result = {'closestTo': closestTo.strftime(timeResponseFormater), 'nextTime': nextTime}
+    if closestIndex != None and closestIndex < len(rowList) - 1:
+        nextTime = rowList[closestIndex + 1]
+        nextTime = nextTime.get('departureTime').strftime(timeFormater)       
+
+    if closestTo != None:
+        closestTo.get('departureTime').strftime(timeFormater)        
+        
+    result = {'closestTo': closestTo, 'nextTime': nextTime}
     return result
 
 def getNext2Trains(departure, arrival):
@@ -79,7 +90,7 @@ def getNext2Trains(departure, arrival):
     if rowList == None or len(rowList) == 0:
         print('No schedule found')
         exit()
-    return findClosestAndNest(rowList)
+    return findClosestAndNext(rowList)
 
 def main(currentStation, cityStation, oceanStation):
     direction = [{'arriveTo': cityStation, 'trains': getNext2Trains(currentStation, cityStation)}]
