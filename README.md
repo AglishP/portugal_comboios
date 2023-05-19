@@ -1,14 +1,15 @@
 # What
-It's python cli tool. It fetch data from cp.pt and find next to trains to selected directions
-I made it for my raspberryPi with dispaly where I wand to see trains to the city center and to Cascais station.
+It's python cli tool. It fetch data from cp.pt and find next two trains to selected directions
+
 
 ## Default value ##
 departure station: Santo Amaro
-first direction: Lisboa - Cais do Sodre
+arrival: Lisboa - Cais do Sodre
 second direction: Cascais
 
 
 Options:
--s departure station
--c first direction
--o second direction
+-d departure station
+-a first direction
+-sd second direction [optionaly]
+-tw /flag/ use defauls station for second destination [optionaly]
