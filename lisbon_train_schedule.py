@@ -10,7 +10,7 @@ timeFormater = '%H:%M'
 timeResponseFormater = '%Hh%M'
 DEPARTURE_STATION = 'Santo Amaro'
 ARRIVE_STATION = 'Lisboa - Cais do Sodre'
-OCEAN_STATION = 'Cascais'
+SECOND_DESTINATION = 'Cascais'
 
 
 
@@ -52,7 +52,6 @@ def rowSchedule_ToList(rowSchedule):
 def findClosestAndNext(rowList):
     now = datetime.datetime.now().strftime(timeFormater)
     currentTime = datetime.datetime.strptime(now, timeFormater)
-    # sortedList = sorted(rowList)
     closestTo = None
     i = 0
     closestIndex = None
@@ -63,17 +62,19 @@ def findClosestAndNext(rowList):
             if closestTo == None:
                 closestTo = rowList[i]
                 closestIndex = i
-            elif time < closestTo:
+            elif time < closestTo.get('departureTime'):
                 closestTo = rowList[i]
                 closestIndex = i
         i+=1
+    result = None
     if closestIndex != None and closestIndex < len(rowList) - 1:
         nextTime = rowList[closestIndex + 1]
-        nextTime = nextTime.get('departureTime').strftime(timeFormater)       
+        nextTime = {'departureTime': nextTime.get('departureTime').strftime(timeFormater), 'duration': nextTime.get('duration')}
 
     if closestTo != None:
-        closestTo.get('departureTime').strftime(timeFormater)        
-        
+        closestTo = {'departureTime': closestTo.get('departureTime').strftime(timeFormater), 'duration': closestTo.get('duration')}   
+    print('Closest to: ' + str(closestTo))
+    print('Next time: ' + str(nextTime))    
     result = {'closestTo': closestTo, 'nextTime': nextTime}
     return result
 
@@ -92,10 +93,10 @@ def getNext2Trains(departure, arrival):
         exit()
     return findClosestAndNext(rowList)
 
-def main(currentStation, cityStation, oceanStation):
+def main(currentStation, cityStation, secondDestination):
     direction = [{'arriveTo': cityStation, 'trains': getNext2Trains(currentStation, cityStation)}]
-    if oceanStation != None:
-        direction.append({'arriveTo': oceanStation, 'trains': getNext2Trains(currentStation, oceanStation)})
+    if secondDestination != None:
+        direction.append({'arriveTo': secondDestination, 'trains': getNext2Trains(currentStation, secondDestination)})
 
     result = {'currentStation': currentStation,'direction': direction}
     
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--departure', help='Your home stations from wich we search schedule', required=False)
     parser.add_argument('-a', '--arrive', help='Your arrival station', required=False)
     parser.add_argument('-tw', '--twoway', help='Use default station for second directions', required=False, action='store_true', default=False)
-    parser.add_argument('-o', '--ocean', help='Your ocean station', required=False)
+    parser.add_argument('-sd', '--second_destination', help='Your second destination', required=False)
     args = parser.parse_args()
     if args.departure != None:
         departureStation = args.departure
@@ -116,11 +117,11 @@ if __name__ == '__main__':
         cityStation = args.arrive
     else:
         cityStation = ARRIVE_STATION
-    oceanStation = None
-    if args.ocean != None:
-        oceanStation = args.ocean
+    secondDestination = None
+    if args.second_destination != None:
+        secondDestination = args.second_destination
     else:
         if args.twoway != None and args.twoway == True:
-            oceanStation = OCEAN_STATION
-    main(departureStation, cityStation, oceanStation)
+            secondDestination = SECOND_DESTINATION
+    main(departureStation, cityStation, secondDestination)
 
